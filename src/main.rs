@@ -6,15 +6,18 @@ use std::{
     time::Duration,
 };
 
+use http_server_rust::thread_pool::ThreadPool;
+
 fn main() {
+    let tpool = ThreadPool::new(4);
     let listener = TcpListener::bind("0.0.0.0:3000").unwrap();
 
-    for stream in listener.incoming() {
+    for stream in listener.incoming().take(2) {
         let stream = stream.unwrap();
 
-        thread::spawn(|| {
+        tpool.execute(|| {
             handle_connection(stream);
-        });
+        })
     }
 }
 
